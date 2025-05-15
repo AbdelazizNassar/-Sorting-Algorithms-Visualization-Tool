@@ -10,11 +10,11 @@ public class MergeSort {
     public MergeSort(VisualizationCallback callback) {
         this.callback = callback;
     }
-    public void mergeSortVisualization(int[] arr) {
+    public void mergeSortVisualization(int[] arr,int animationDelay) {
         new Thread(() -> {
             try {
                 int[] temp = new int[arr.length];
-                mergeSortHelper(arr, temp, 0, arr.length - 1);
+                mergeSortHelper(arr, temp, 0, arr.length - 1,animationDelay);
                 callback.update(arr, -1, -1, "Merge Sort complete!");
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -22,15 +22,15 @@ public class MergeSort {
         }).start();
     }
 
-    private void mergeSortHelper(int[] arr, int[] temp, int left, int right) throws InterruptedException {
+    private void mergeSortHelper(int[] arr, int[] temp, int left, int right,int animationDelay) throws InterruptedException {
         if (left < right) {
             int mid = left + (right - left) / 2;
-            mergeSortHelper(arr, temp, left, mid);
-            mergeSortHelper(arr, temp, mid + 1, right);
+            mergeSortHelper(arr, temp, left, mid,animationDelay);
+            mergeSortHelper(arr, temp, mid + 1, right,animationDelay);
             merge(arr, temp, left, mid, right);
 
             callback.update(arr, -1, -1, "Merged " + left + "-" + right + ": " + Arrays.toString(arr));
-            Thread.sleep(1000);
+            Thread.sleep(animationDelay);
         }
     }
 

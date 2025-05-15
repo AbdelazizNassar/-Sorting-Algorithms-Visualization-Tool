@@ -10,7 +10,7 @@ public class SelectionSort {
     }
 
 
-    public void selectionSortVisualization(int[] arr) {
+    public void selectionSortVisualization(int[] arr,int animationDelay) {
         new Thread(() -> {
             try {
                 for (int i = 0; i < arr.length - 1; i++) {
@@ -20,7 +20,7 @@ public class SelectionSort {
                             minIndex = j;
                         }
                         callback.update(arr, j, minIndex, "Comparing " + arr[j] + " with current min " + arr[minIndex]);
-                        Thread.sleep(500);
+                        Thread.sleep(animationDelay);
                     }
 
                     if (minIndex != i) {
@@ -28,11 +28,11 @@ public class SelectionSort {
                         arr[i] = arr[minIndex];
                         arr[minIndex] = temp;
                         callback.update(arr, i, minIndex, "Swapped " + arr[i] + " and " + arr[minIndex]);
-                        Thread.sleep(800);
+                        Thread.sleep(animationDelay);
                     }
 
                     callback.update(arr, -1, -1, "Position " + i + " fixed: " + arr[i]);
-                    Thread.sleep(500);
+                    Thread.sleep(animationDelay);
                 }
                 callback.update(arr, -1, -1, "Selection Sort complete!");
             } catch (InterruptedException e) {

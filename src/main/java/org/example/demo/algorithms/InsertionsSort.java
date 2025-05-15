@@ -9,7 +9,7 @@ public class InsertionsSort {
         this.callback = callback;
     }
 
-    public void insertionSortVisualization(int[] arr) {
+    public void insertionSortVisualization(int[] arr,int animationDelay) {
         new Thread(() -> {
             try {
                 for (int i = 1; i < arr.length; i++) {
@@ -20,12 +20,12 @@ public class InsertionsSort {
                         arr[j + 1] = arr[j];
                         callback.update(arr, j, j + 1, "Shift element " + arr[j + 1] + " to the right");
                         j--;
-                        Thread.sleep(800);
+                        Thread.sleep(animationDelay);
                     }
 
                     arr[j + 1] = key;
                     callback.update(arr, j + 1, -1, "Insert " + key + " at position " + (j + 1));
-                    Thread.sleep(800);
+                    Thread.sleep(animationDelay);
                 }
                 callback.update(arr, -1, -1, "Insertion Sort complete!");
             } catch (InterruptedException e) {

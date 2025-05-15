@@ -1,5 +1,7 @@
 package org.example.demo;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -11,7 +13,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.example.demo.algorithms.*;
 
 import java.io.IOException;
@@ -23,7 +27,7 @@ public class HelloApplication extends Application {
     private static final int HEIGHT = 720;
     private static final int MAX_ARRAY_SIZE = 30;
     private static final int MIN_VALUE = 1;
-    private static final int MAX_VALUE = 20;
+    private static final int MAX_VALUE = 45;
     private static final int BAR_WIDTH = 40;
     private static final int SPACING = 5;
 
@@ -32,36 +36,27 @@ public class HelloApplication extends Application {
     private TextArea stepsArea;
     private ComboBox<String> algorithmComboBox;
     private TextField inputField;
-    private Button sortButton;
-    private Button resetButton;
-    private Button randomButton;
+    private Button sortButton, resetButton, randomButton;
+    private Slider speedSlider;
+    private int animationSpeed = 500;
 
     @Override
     public void start(Stage primaryStage) {
-        // Create UI components
         visualizationPane = new Pane();
         visualizationPane.setPrefSize(WIDTH, 300);
-        visualizationPane.setStyle("-fx-background-color: #f0f0f0;");
+        visualizationPane.setStyle("-fx-background-color: #e3f2fd; -fx-border-color: #90caf9; -fx-border-radius: 10;");
 
         stepsArea = new TextArea();
         stepsArea.setEditable(false);
         stepsArea.setPrefSize(WIDTH, 150);
-        stepsArea.setStyle("-fx-font-family: monospace;");
+        stepsArea.setStyle("-fx-font-family: monospace; -fx-background-color: #fafafa;");
 
         algorithmComboBox = new ComboBox<>();
-        algorithmComboBox.getItems().addAll(
-                "Insertion Sort",
-                "Merge Sort",
-                "Bubble Sort",
-                "Heap Sort",
-                "Selection Sort",
-                "Quick Sort",
-                "Radix Sort"
-        );
+        algorithmComboBox.getItems().addAll("Insertion Sort", "Merge Sort", "Bubble Sort", "Heap Sort", "Selection Sort", "Quick Sort", "Radix Sort", "Counting Sort");
         algorithmComboBox.setValue("Insertion Sort");
 
         inputField = new TextField();
-        inputField.setPromptText("Enter 15-30 numbers between 1-20, comma separated (e.g., 5,2,9,1,5,6)");
+        inputField.setPromptText("Enter 10-20 numbers between 1-20, comma separated");
         inputField.setPrefWidth(400);
 
         sortButton = new Button("Sort");
@@ -73,41 +68,42 @@ public class HelloApplication extends Application {
         randomButton = new Button("Random");
         randomButton.setOnAction(e -> generateRandomArray());
 
-        // Layout
-        HBox inputBox = new HBox(10,
-                new Label("Algorithm:"), algorithmComboBox,
-                new Label("Input:"), inputField
-        );
+        speedSlider = new Slider(500, 1500, 300);
+        speedSlider.setShowTickLabels(true);
+        speedSlider.setShowTickMarks(true);
+        speedSlider.setMajorTickUnit(250);
+        speedSlider.valueProperty().addListener((obs, oldVal, newVal) -> animationSpeed = newVal.intValue());
+
+        Label speedLabel = new Label("Speed (ms):");
+        HBox speedBox = new HBox(10, speedLabel, speedSlider);
+        speedBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label title = new Label("Sorting Algorithm Visualizer");
+        title.setFont(Font.font("Arial", 24));
+
+        HBox inputBox = new HBox(10, new Label("Algorithm:"), algorithmComboBox, new Label("Input:"), inputField);
         inputBox.setAlignment(Pos.CENTER_LEFT);
 
         HBox buttonBox = new HBox(10, sortButton, resetButton, randomButton);
         buttonBox.setAlignment(Pos.CENTER);
 
-        VBox root = new VBox(15,
-                new Label("Sorting Algorithm Visualizer"),
-                inputBox,
-                buttonBox,
-                visualizationPane,
-                new Label("Sorting Steps:"),
-                stepsArea
-        );
+        VBox root = new VBox(15, title, inputBox, buttonBox, speedBox, visualizationPane, new Label("Sorting Steps:"), stepsArea);
         root.setPadding(new Insets(15));
-        root.setAlignment(Pos.TOP_CENTER);
+        root.setStyle("-fx-background-color: #ffffff;");
 
         Scene scene = new Scene(root, WIDTH, HEIGHT);
-        primaryStage.setTitle("Sorting Algorithm Visualizer");
+        primaryStage.setTitle("Sorting Visualizer Tool");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Initial setup
         generateRandomArray();
     }
 
     private void generateRandomArray() {
-        int size = 15 + (int)(Math.random() * 16);
+        int size = 10 + (int) (Math.random() * 11);
         array = new int[size];
         for (int i = 0; i < size; i++) {
-            array[i] = MIN_VALUE + (int)(Math.random() * (MAX_VALUE - MIN_VALUE + 1));
+            array[i] = MIN_VALUE + (int) (Math.random() * (MAX_VALUE - MIN_VALUE + 1));
         }
         inputField.setText(Arrays.toString(array).replaceAll("[\\[\\]]", ""));
         resetVisualization();
@@ -126,8 +122,8 @@ public class HelloApplication extends Application {
                     .mapToInt(Integer::parseInt)
                     .toArray();
 
-            if (array.length < 15 || array.length > MAX_ARRAY_SIZE) {
-                throw new IllegalArgumentException("Array size must be between 3 and " + MAX_ARRAY_SIZE);
+            if (array.length < 10 || array.length > MAX_ARRAY_SIZE) {
+                throw new IllegalArgumentException("Array size must be between 15 and " + MAX_ARRAY_SIZE);
             }
 
             for (int num : array) {
@@ -148,10 +144,8 @@ public class HelloApplication extends Application {
 
     private void drawArray(int[] arr, int highlight1, int highlight2) {
         visualizationPane.getChildren().clear();
-
         double maxValue = Arrays.stream(arr).max().orElse(1);
         double scale = 250 / maxValue;
-
         double startX = (WIDTH - (arr.length * (BAR_WIDTH + SPACING))) / 2;
 
         for (int i = 0; i < arr.length; i++) {
@@ -161,27 +155,24 @@ public class HelloApplication extends Application {
                     BAR_WIDTH,
                     arr[i] * scale
             );
-
-            if (i == highlight1 || i == highlight2) {
-                bar.setFill(Color.RED);
-            } else {
-                bar.setFill(Color.STEELBLUE);
-            }
-
+            bar.setFill(i == highlight1 || i == highlight2 ? Color.RED : Color.STEELBLUE);
             bar.setStroke(Color.BLACK);
 
             Label label = new Label(String.valueOf(arr[i]));
-            label.setLayoutX(startX + i * (BAR_WIDTH + SPACING) + BAR_WIDTH/2 - 10);
-            label.setLayoutY(285);
+            label.setLayoutX(startX + i * (BAR_WIDTH + SPACING) + BAR_WIDTH / 4.0);
+            label.setLayoutY(290);
 
             visualizationPane.getChildren().addAll(bar, label);
         }
     }
+
     private void updateVisualization(int[] arr, int highlight1, int highlight2, String message) {
-        javafx.application.Platform.runLater(() -> {
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(animationSpeed), e -> {
             drawArray(arr, highlight1, highlight2);
             stepsArea.appendText(message + "\n");
-        });
+        }));
+        timeline.play();
     }
 
     private void startSorting() {
@@ -194,48 +185,41 @@ public class HelloApplication extends Application {
 
         switch (algorithm) {
             case "Insertion Sort":
-                InsertionsSort insertionSort = new InsertionsSort(this::updateVisualization);
-                insertionSort.insertionSortVisualization(arrCopy);
+                new InsertionsSort(this::updateVisualization).insertionSortVisualization(arrCopy,animationSpeed);
                 break;
             case "Merge Sort":
-                MergeSort mergeSort = new MergeSort(this::updateVisualization);
-                mergeSort.mergeSortVisualization(arrCopy);
+                new MergeSort(this::updateVisualization).mergeSortVisualization(arrCopy,animationSpeed);
                 break;
             case "Bubble Sort":
-                BubbleSort bubbleSort = new BubbleSort(this::updateVisualization);
-                bubbleSort.bubbleSortVisualization(arrCopy);
+                new BubbleSort(this::updateVisualization).bubbleSortVisualization(arrCopy,animationSpeed);
                 break;
             case "Heap Sort":
-                HeapSort heapSort = new HeapSort(this::updateVisualization);
-                heapSort.heapSortVisualization(arrCopy);
+                new HeapSort(this::updateVisualization).heapSortVisualization(arrCopy,animationSpeed);
                 break;
             case "Selection Sort":
-                SelectionSort selectionSort = new SelectionSort(this::updateVisualization);
-                selectionSort.selectionSortVisualization(arrCopy);
+                new SelectionSort(this::updateVisualization).selectionSortVisualization(arrCopy,animationSpeed);
                 break;
             case "Quick Sort":
-                QuickSort quickSort = new QuickSort(this::updateVisualization);
-                quickSort.quickSortVisualization(arrCopy);
+                new QuickSort(this::updateVisualization).quickSortVisualization(arrCopy,animationSpeed);
                 break;
             case "Radix Sort":
-                RadixSort radixSort = new RadixSort(this::updateVisualization);
-                radixSort.radixSortVisualization(arrCopy);
+                new RadixSort(this::updateVisualization).radixSortVisualization(arrCopy,animationSpeed);
+                break;
+            case "Counting Sort":
+                new CountingSort(this::updateVisualization).countingSortVisualization(arrCopy,animationSpeed);
                 break;
         }
     }
 
     private void showAlert(String message) {
-        javafx.application.Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Warning");
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
-        });
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
-
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 }

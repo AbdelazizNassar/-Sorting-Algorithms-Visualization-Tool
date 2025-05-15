@@ -10,33 +10,33 @@ public class HeapSort {
     public HeapSort(VisualizationCallback callback) {
         this.callback = callback;
     }
-    public void heapSortVisualization(int[] arr) {
+    public void heapSortVisualization(int[] arr,int animationDelay) {
         new Thread(() -> {
             try {
                 // Build heap (rearrange array)
                 for (int i = arr.length / 2 - 1; i >= 0; i--) {
                     heapify(arr, arr.length, i);
                     callback.update(arr, i, -1, "Heapify at index " + i);
-                    Thread.sleep(1000);
+                    Thread.sleep(animationDelay);
                 }
 
                 callback.update(arr, -1, -1, "Max heap built: " + Arrays.toString(arr));
-                Thread.sleep(1000);
+                Thread.sleep(animationDelay);
 
-                // One by one extract an element from heap
+
                 for (int i = arr.length - 1; i > 0; i--) {
-                    // Move current root to end
+
                     int temp = arr[0];
                     arr[0] = arr[i];
                     arr[i] = temp;
 
                     callback.update(arr, 0, i, "Swapped root " + temp + " with last element " + arr[0]);
-                    Thread.sleep(1000);
+                    Thread.sleep(animationDelay);
 
-                    // call max heapify on the reduced heap
+
                     heapify(arr, i, 0);
                     callback.update(arr, 0, -1, "Heapify reduced heap");
-                    Thread.sleep(1000);
+                    Thread.sleep(animationDelay);
                 }
 
                 callback.update(arr, -1, -1, "Heap Sort complete!");
